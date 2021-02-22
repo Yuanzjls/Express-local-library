@@ -16,8 +16,22 @@ exports.bookinstance_list = function(req, res, next) {
   };
 
 // Display detail page for a specific BookInstance.
-exports.bookinstance_detail = function(req, res){
-    res.send('NOT IMPLEMENTED: BookInstance detail: ' + req.params.id);
+exports.bookinstance_detail = function(req, res, next){
+    BookInstance.findById(req.params.id)
+    .populate('book')
+    .exec(function(err, book_instance){
+        if (err){
+            return next(err);
+        }
+        if (book_instance==null){
+            err = new Error("No book instance found");
+            err.status = 404;
+            return next(err);
+        }
+        // Successful, so render
+        res.render("bookinstance_detail", {title:"Copy" + book_instance.title, instance_book:book_instance});
+
+    });
 };
 
 // Display BookInstance create form on GET.

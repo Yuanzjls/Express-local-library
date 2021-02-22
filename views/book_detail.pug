@@ -2,7 +2,7 @@ extends layout
 
 block content
   h1 Title: #{title}
-  p #[strong Author:] #{book.author.family_name}, #{book.author.first_name} 
+  p #[strong Author:] #{book.author.family_name}, #{book.author.first_name} (#{book.author.life_span})
 
   p #[strong Summary:] #{book.summary}
   p #[strong ISBN:] #{book.isbn}
