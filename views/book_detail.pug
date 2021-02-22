@@ -1,0 +1,34 @@
+extends layout
+
+block content
+  h1 Title: #{title}
+  p #[strong Author:] #{book.author.family_name}, #{book.author.first_name} 
+
+  p #[strong Summary:] #{book.summary}
+  p #[strong ISBN:] #{book.isbn}
+  p #[strong Gnere:] 
+   each val, index in book.genre 
+    a(href=val.url) #{val.name}
+    if index < book.genre.length -1 
+      | , 
+  div(style='margin-left:20px;margin-top:20px')
+    h4 Copies 
+
+    each val in book_instances
+      if (val.status=="Available")
+          span.text-success  #{val.status}
+      else if (val.status=="Maintenance")
+        span.text-danger #{val.status}
+      else if (val.status=="Loaned")
+        span.text-warning #{val.status}
+      else if (val.status=="Reserved")
+        span.text-info #{val.status}        
+      p #[strong Imprint:] #{val.imprint}
+      if (val.status!="Available")
+        p  #[strong Due:] #{val.due_back_formatted} 
+      p #[strong id:] 
+        a(href=val.url) #{val.id}
+    else 
+      p There are no copies of this book in the library
+
+
