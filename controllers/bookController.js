@@ -55,7 +55,6 @@ exports.book_detail = function(req, res, next){
             BookInstance.find({'book': req.params.id}).exec(callback);            
         }, 
     }, function(err, results){
-            console.log(results);
             if (err) {return next(err);}
             if (results.book==null){
                 var err = new Error('Book not found');
