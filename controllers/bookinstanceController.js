@@ -1,4 +1,7 @@
 var BookInstance = require('../models/bookinstance');
+var Book = require('../models/book');
+const {body, validationResult} = require("express-validator");
+const bookinstance = require('../models/bookinstance');
 
 
 // Display list of all BookInstances.
@@ -35,14 +38,51 @@ exports.bookinstance_detail = function(req, res, next){
 };
 
 // Display BookInstance create form on GET.
-exports.bookinstance_create_get = function(req, res){
-    res.send('NOT IMPLEMENTED: BookInstance create GET');
+exports.bookinstance_create_get = function(req, res, next){
+    Book.find({}, 'title')
+    .sort([['title']])
+    .collation({locale: "en" })
+    .exec(function (err, books){
+        if (err){return next(err);} 
+        res.render('bookinstance_form', {title:'Create BookInstance', books:books});  
+    });    
 }; 
 
 // Handle BookInstance create on POST.
-exports.bookinstance_create_post = function(req, res){
-    res.send('NOT IMPLEMENTED: BookInstance create POST');
-};
+exports.bookinstance_create_post = [
+    body('book', 'Book must not be empty').trim().isLength({min:1}).escape(),
+    body('imprint', 'Imprint must not be empty').trim().isLength({min:1}).escape(),
+    body('date_due', 'Invalid date').optional({checkFalsy:true}).isISO8601().toDate(),
+    body('status').escape(),
+    function(req, res, next){
+        let errors = validationResult(req);
+
+        let bookinstance = new BookInstance({
+            book:req.body.book, 
+            imprint:req.body.imprint,
+            due_back:req.body.due_back,
+            status:req.body.status
+        });
+        
+        if (!errors.isEmpty()){
+            Book.find({}, 'title')
+            .sort([['title']])
+            .collation({locale: "en" })
+            .exec(function (err, books){
+                if (err){return next(err);} 
+                console.log(bookinstance);
+                return res.render('bookinstance_form', {title:'Create BookInstance', books:books, bookinstance:bookinstance, errors:errors.array()});  
+            });  
+            return;
+        }
+        
+        bookinstance.save(function(err){
+            if (err){return next(err);}
+            
+            res.redirect(bookinstance.url);
+        });
+    }
+];
 
 // Display BookInstance delete form on GET.
 exports.bookinstance_delete_get = function(req, res){
