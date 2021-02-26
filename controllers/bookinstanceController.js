@@ -32,13 +32,14 @@ exports.bookinstance_detail = function(req, res, next){
             return next(err);
         }
         // Successful, so render
-        res.render("bookinstance_detail", {title:"Copy" + book_instance.title, instance_book:book_instance});
+        res.render("bookinstance_detail", {title:"Copy" +  ' '+ book_instance.book.title, instance_book:book_instance});
 
     });
 };
 
 // Display BookInstance create form on GET.
 exports.bookinstance_create_get = function(req, res, next){
+    
     Book.find({}, 'title')
     .sort([['title']])
     .collation({locale: "en" })
@@ -56,7 +57,7 @@ exports.bookinstance_create_post = [
     body('status').escape(),
     function(req, res, next){
         let errors = validationResult(req);
-
+        
         let bookinstance = new BookInstance({
             book:req.body.book, 
             imprint:req.body.imprint,
@@ -70,7 +71,6 @@ exports.bookinstance_create_post = [
             .collation({locale: "en" })
             .exec(function (err, books){
                 if (err){return next(err);} 
-                console.log(bookinstance);
                 return res.render('bookinstance_form', {title:'Create BookInstance', books:books, bookinstance:bookinstance, errors:errors.array()});  
             });  
             return;

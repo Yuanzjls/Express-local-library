@@ -4,6 +4,8 @@ var Genre = require('../models/genre');
 var BookInstance = require('../models/bookinstance');
 const {body, validationResult} = require("express-validator");
 var async = require('async');
+const bookinstance = require('../models/bookinstance');
+const book = require('../models/book');
 
 
 exports.index = function(req, res){
@@ -77,11 +79,11 @@ exports.book_create_get = function(req, res, next){
             Author.find()
             .collation({locale: "en" })
             .sort([['family_name', 'ascending']])
-            .exec(callback)
+            .exec(callback);
         },
         genre_list: function(callback) {
             Genre.find()
-            .exec(callback)        
+            .exec(callback);        
         }        
     }, function(err, results){
         if (err) {return next(err);}
@@ -136,11 +138,9 @@ exports.book_create_post = [
             // Get all authors and genre for form.
             async.parallel({
                 authors:function(callback){
-                    console.log(Genre.find.toString());
                     Author.find(callback);
                 },
                 genres:function(callback){
-                    console.log(Genre.find.toString());
                     Genre.find(callback);
                 }
             }, function(err, results){
@@ -170,13 +170,56 @@ exports.book_create_post = [
 ];
 
 // Display book delete form on GET.
-exports.book_delete_get = function(req, res){
-    res.send('NOT IMPLEMENTED: Book delete GET');
+exports.book_delete_get = function(req, res, next){
+    async.parallel({
+        book: function(callback){
+        Book.findById(req.params.id)
+        .populate('author')
+        .populate('genre')
+        .exec(callback);
+        },
+        bookinstances: function(callback){
+            BookInstance.find({book:req.params.id})
+            .exec(callback);
+        }
+    },function(err, results){
+        if (err){return next(err);}
+        // Success, so render
+        console.log(results);
+        res.render('book_delete', {title:'Delete book', book:results.book, bookinstances:results.bookinstances});
+        return;
+        }
+    );
 };
 
 // Handle book delete on POST.
-exports.book_delete_post = function(req, res){
-    res.send('NOT IMPLEMENTED: Book delete POST');
+exports.book_delete_post = function(req, res, next){
+    async.parallel({
+        book: function(callback){
+        Book.findById(req.body.bookid)
+        .populate('author')
+        .populate('genre')
+        .exec(callback);
+        },
+        bookinstances: function(callback){
+            BookInstance.find({book:req.body.bookid})
+            .exec(callback);
+        }
+    },function(err, results){
+        if (err){return next(err);}
+        // Success, so render
+        if (results.bookinstances.length>0){
+            res.render('book_delete', {title:'Delete book'+ results.book.title, book:results.book, bookinstances:results.bookinstances});
+            return;
+        }
+        Book.findByIdAndDelete(req.body.bookid, function deleteBook(err){
+            if (err){return next(err);}
+            // Success -go to author list
+            res.redirect('/catalog/books');
+        });
+
+    }
+    );
 };
 
 // Display book update form on GET.

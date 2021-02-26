@@ -17,7 +17,7 @@ block content
             input#imprint.form-control(type='text' name='imprint' placeholder='Publisher and date information' value=(bookinstance===undefined?'':bookinstance.imprint))
         .form-group 
             label(for='due_back') #[strong Date when book available:]
-            input#due_back.form-control(type='date' name='due_back' value=(bookinstance===undefined?'':bookinstance.due_back.toISOString().split('T')[0]))
+            input#due_back.form-control(type='date' name='due_back' value=(bookinstance===undefined?'':bookinstance.due_back.toISOString().split('T')[0]), required)
         .form-group
             label(for='status') #[strong Status:]
             select#status.form-control(name="status")

@@ -71,7 +71,7 @@ exports.author_create_post = [
         }
         else {
             // Data from form is valid.
-            console.log(req.body.date_of_birth, req.body.date_of_death);
+            // console.log(req.body.date_of_birth, req.body.date_of_death);
             // Create an Author object with escaped and trimmed data.
             var author = new Author(
                 {
@@ -126,7 +126,7 @@ exports.author_delete_post = function(req, res){
             res.render('author_delete', {title: 'Delete Author', author:results.author, author_books:results.authors_books});
             return;
         }
-        Author.findByIdAndRemove(req.body.authorid, function deleteAutor(err){
+        Author.findByIdAndDelete(req.body.authorid, function deleteAutor(err){
             if (err){return next(err);}
             // Success - go to author list
             res.redirect('/catalog/authors');
