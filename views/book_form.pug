@@ -1,7 +1,7 @@
 extends layout 
 
 block content 
-    h1 Create Book
+    h1= title
 
     form(action="", method="post")
         div.form-group
@@ -12,7 +12,7 @@ block content
             select#author.form-control(name='author')
                 for author in author_list
                     if book
-                        option(value=author._id selected=((book.author._id.toString()===author._id.toString())?selected:false)) #{author.family_name}, #{author.first_name}
+                        option(value=author._id selected=((book.author._id.toString()===author._id.toString())?'selected':false)) #{author.family_name}, #{author.first_name}
                     else
                         option(value=author._id) #{author.family_name}, #{author.first_name}
              

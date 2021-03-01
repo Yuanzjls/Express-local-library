@@ -1,6 +1,7 @@
 var BookInstance = require('../models/bookinstance');
 var Book = require('../models/book');
 const {body, validationResult} = require("express-validator");
+const async = require('async');
 const bookinstance = require('../models/bookinstance');
 
 
@@ -111,11 +112,56 @@ exports.bookinstance_delete_post = function(req, res, next){
 };
 
 // Display BookInstance update form on GET.
-exports.bookinstance_update_get = function(req, res){
-    res.send('NOT IMPLEMENTED: BookInstance update GET');
+exports.bookinstance_update_get = function(req, res, next){
+    async.parallel({        
+        bookinstance: function(callback){
+            BookInstance.findById(req.params.id)
+            .populate('book')
+            .exec(callback)
+        },
+        books:function(callback){
+            Book.find({}, 'title')
+            .sort([['title']])
+            .collation({locale: "en" })
+            .exec(callback)
+        }
+    }, function(err, results){
+        if (err){next(err);}
+        return res.render('bookinstance_form', {title:'Update Bookinstance', books:results.books, bookinstance:results.bookinstance});
+    });
+    
 };
 
 // Handle bookinstance update on POST.
-exports.bookinstance_update_post = function(req, res){
-    res.send('NOT IMPLEMENTED: BookInstance update POST');
-};
+exports.bookinstance_update_post = [
+    body('book', 'Book must not be empty').trim().isLength({min:1}).escape(),
+    body('imprint', 'Imprint must not be empty').trim().isLength({min:1}).escape(),
+    body('date_due', 'Invalid date').optional({checkFalsy:true}).isISO8601().toDate(),
+    body('status').escape(),
+    function(req, res, next){
+        let errors = validationResult(req);
+
+        let bookinstance = new BookInstance({
+            book:req.body.book, 
+            imprint:req.body.imprint,
+            due_back:req.body.due_back,
+            status:req.body.status,
+            _id:req.params.id
+        });
+        if (!errors.isEmpty())
+        {
+            Book.find({}, 'title')
+            .sort([['title']])
+            .collation({locale: "en" })
+            .exec(function(err, books){
+                if (err){return next(err);}
+                return res.render('bookinstance_form', {title:'Updata Bookinstance', books:books, bookinstance:bookinstance, errors:errors.array()});
+            })
+            return;
+        }
+        BookInstance.findByIdAndUpdate(req.params.id, bookinstance, function(err, thebookinstance){
+            if (err){return next(err);}
+            return res.redirect(thebookinstance.url);
+        });
+    }
+];

@@ -14,11 +14,11 @@ block content
 
         div.form-group 
             label(for='date_of_birth') Date of birth:
-            input#date_of_birth.form-control(type='date' name='date_of_birth' value=(undefined===author ? '' : author.date_of_birth) )
+            input#date_of_birth.form-control(type='date' name='date_of_birth' value=(undefined===author? '' : (author.date_of_birth==null?'':author.date_of_birth.toISOString().split('T')[0])))
 
         div.form-group
             lable(for='date_of_death') #[strong Date of death:]
-            input#date_of_death.form-control(type='date' name='date_of_death' value=(undefined===author ? '' : author.date_of_death) )
+            input#date_of_death.form-control(type='date' name='date_of_death' value=(undefined===author? '' : (author.date_of_death==null?'':author.date_of_death.toISOString().split('T')[0])))
 
 
         button.btn.btn-primary(type='submit') Submit
